@@ -226,6 +226,4 @@ This project is part of ongoing academic research. Code is provided for review p
 
 ## Contact
 
-Yongkang Sun — [GitHub](https://github.com/YOUR_USERNAME)
-
-<!-- Add email, LinkedIn, or other contact info as needed -->
+Yongkang Sun — [GitHub](https://github.com/skysyk12) · syk940940@gmail.com
