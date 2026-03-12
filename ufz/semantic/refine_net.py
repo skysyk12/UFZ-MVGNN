@@ -2,39 +2,20 @@
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch_geometric.nn import GATConv
 
 
-class _GATEncoder(nn.Module):
-    """Shared 2-layer GATConv encoder."""
-
-    def __init__(self, in_dim: int, hidden_dim: int, heads: int, dropout: float):
-        super().__init__()
-        self.dropout = dropout
-
-        self.conv1 = GATConv(in_dim, hidden_dim, heads=heads, dropout=dropout, concat=True)
-        self.bn1 = nn.BatchNorm1d(hidden_dim * heads)
-
-        self.conv2 = GATConv(
-            hidden_dim * heads, hidden_dim, heads=1, concat=False, dropout=dropout
-        )
-        self.bn2 = nn.BatchNorm1d(hidden_dim)
-
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        h = F.dropout(x, p=self.dropout, training=self.training)
-        h = self.conv1(h, edge_index)
-        h = self.bn1(h)
-        h = F.elu(h)
-        h = F.dropout(h, p=self.dropout, training=self.training)
-        h = self.conv2(h, edge_index)
-        h = self.bn2(h)
-        h = F.elu(h)
-        return h
-
-
 class RefineNet(nn.Module):
-    """Dual-stream fusion: z·H_phys + (1-z)·H_sem."""
+    """Dual-stream gated fusion: z · H_phys + (1-z) · H_sem.
+
+    Architecture:
+        - Two independent GAT encoders for physical and semantic streams
+        - Learned gating mechanism to balance stream contributions
+        - MLP decoder for refined POI distribution prediction
+
+    Input:  Physical features [N, phys_dim] + Semantic features [N, sem_dim] + edge_index
+    Output: Refined POI distribution [N, num_classes]
+    """
 
     def __init__(
         self,
@@ -46,18 +27,8 @@ class RefineNet(nn.Module):
         dropout: float = 0.3,
     ):
         super().__init__()
-
-        self.phys_encoder = _GATEncoder(phys_dim, hidden_dim, heads, dropout)
-        self.sem_encoder = _GATEncoder(sem_dim, hidden_dim, heads, dropout)
-
-        self.gate_linear = nn.Linear(hidden_dim * 2, 1)
-
-        self.decoder = nn.Sequential(
-            nn.Linear(hidden_dim, hidden_dim // 2),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(hidden_dim // 2, num_classes),
-        )
+        # Implementation withheld — will be released upon paper publication.
+        raise NotImplementedError
 
     def forward(
         self,
@@ -65,12 +36,8 @@ class RefineNet(nn.Module):
         x_sem: torch.Tensor,
         edge_index: torch.Tensor,
     ) -> torch.Tensor:
-        h_phys = self.phys_encoder(x_phys, edge_index)
-        h_sem = self.sem_encoder(x_sem, edge_index)
-        z = torch.sigmoid(self.gate_linear(torch.cat([h_phys, h_sem], dim=-1)))
-        h_fused = z * h_phys + (1.0 - z) * h_sem
-        logits = self.decoder(h_fused)
-        return logits
+        """Forward pass with gated dual-stream fusion."""
+        raise NotImplementedError
 
     def forward_relu_embedding(
         self,
@@ -78,13 +45,8 @@ class RefineNet(nn.Module):
         x_sem: torch.Tensor,
         edge_index: torch.Tensor,
     ) -> torch.Tensor:
-        h_phys = self.phys_encoder(x_phys, edge_index)
-        h_sem = self.sem_encoder(x_sem, edge_index)
-        z = torch.sigmoid(self.gate_linear(torch.cat([h_phys, h_sem], dim=-1)))
-        h_fused = z * h_phys + (1.0 - z) * h_sem
-        h = self.decoder[0](h_fused)
-        h = self.decoder[1](h)
-        return h
+        """Return intermediate fused embedding (before final classification)."""
+        raise NotImplementedError
 
     def get_gate_values(
         self,
@@ -92,8 +54,5 @@ class RefineNet(nn.Module):
         x_sem: torch.Tensor,
         edge_index: torch.Tensor,
     ) -> torch.Tensor:
-        with torch.no_grad():
-            h_phys = self.phys_encoder(x_phys, edge_index)
-            h_sem = self.sem_encoder(x_sem, edge_index)
-            z = torch.sigmoid(self.gate_linear(torch.cat([h_phys, h_sem], dim=-1)))
-        return z.squeeze(-1)
+        """Return gate values z ∈ [0,1] for analysis/visualization."""
+        raise NotImplementedError

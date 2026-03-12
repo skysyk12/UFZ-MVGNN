@@ -10,21 +10,28 @@ class FeatureTower(nn.Module):
 
     def __init__(self, in_dim: int, hidden_dim: int, out_dim: int, dropout: float = 0.1):
         super().__init__()
-        self.mlp = nn.Sequential(
-            nn.Linear(in_dim, hidden_dim),
-            nn.BatchNorm1d(hidden_dim),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(hidden_dim, out_dim),
-            nn.BatchNorm1d(out_dim),
-        )
+        # Implementation withheld — will be released upon paper publication.
+        raise NotImplementedError
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.mlp(x)
+        raise NotImplementedError
 
 
 class MultiTowerEncoder(nn.Module):
-    """Multi-tower input encoder: geo + topo + semantic towers."""
+    """Multi-tower input encoder: geo + topo + semantic towers with gated fusion.
+
+    Architecture:
+        Geo features (27D)  ──→ Tower MLP ──→ tower_dim ──┐
+        Topo features (15D) ──→ Tower MLP ──→ tower_dim ──┼──→ Concat ──→ Fusion MLP ──→ fusion_dim
+        Sem features (64D)  ──→ Tower MLP ──→ tower_dim ──┘
+
+    Args:
+        geo_dim: Geometric features (shape, size, orientation)
+        topo_dim: Topological features (graphlet orbits)
+        sem_dim: Semantic features (POI/IDW encoded)
+        tower_dim: Output dimension of each tower
+        fusion_dim: Final fused feature dimension
+    """
 
     def __init__(
         self,
@@ -35,49 +42,18 @@ class MultiTowerEncoder(nn.Module):
         fusion_dim: int = 128,
         dropout: float = 0.1,
     ):
-        """
-        Args:
-            geo_dim: Geometric features (shape, size, orientation)
-            topo_dim: Topological features (graphlet)
-            sem_dim: Semantic features (POI/IDW)
-            tower_dim: Output dimension of each tower
-            fusion_dim: Final fused feature dimension
-        """
         super().__init__()
-
-        self.geo_tower = FeatureTower(geo_dim, tower_dim * 2, tower_dim, dropout)
-        self.topo_tower = FeatureTower(topo_dim, tower_dim * 2, tower_dim, dropout)
-        self.sem_tower = FeatureTower(sem_dim, tower_dim * 4, tower_dim, dropout)
-
-        self.fusion = nn.Sequential(
-            nn.Linear(tower_dim * 3, fusion_dim),
-            nn.BatchNorm1d(fusion_dim),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-        )
-
-        self.output_dim = fusion_dim
+        # Implementation withheld — will be released upon paper publication.
+        raise NotImplementedError
 
     def forward(
         self, x_geo: torch.Tensor, x_topo: torch.Tensor, x_sem: torch.Tensor
     ) -> torch.Tensor:
-        """Fuse three feature towers."""
-        h_geo = self.geo_tower(x_geo)
-        h_topo = self.topo_tower(x_topo)
-        h_sem = self.sem_tower(x_sem)
-
-        h_concat = torch.cat([h_geo, h_topo, h_sem], dim=1)
-        return self.fusion(h_concat)
+        """Fuse three feature towers into unified representation."""
+        raise NotImplementedError
 
     def forward_with_tower_outputs(
         self, x_geo: torch.Tensor, x_topo: torch.Tensor, x_sem: torch.Tensor
     ) -> Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]:
-        """Return fused output + individual tower outputs."""
-        h_geo = self.geo_tower(x_geo)
-        h_topo = self.topo_tower(x_topo)
-        h_sem = self.sem_tower(x_sem)
-
-        h_concat = torch.cat([h_geo, h_topo, h_sem], dim=1)
-        h_fused = self.fusion(h_concat)
-
-        return h_fused, (h_geo, h_topo, h_sem)
+        """Return fused output + individual tower outputs for analysis."""
+        raise NotImplementedError

@@ -9,23 +9,41 @@ from .losses import InfoNCELoss
 
 
 class ProjectionHead(nn.Module):
-    """Projection head: MLP for contrastive learning."""
+    """Projection head: MLP for mapping representations to contrastive space."""
 
     def __init__(self, in_dim: int, hidden_dim: int, out_dim: int):
         super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(in_dim, hidden_dim),
-            nn.BatchNorm1d(hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, out_dim),
-        )
+        # Implementation withheld — will be released upon paper publication.
+        raise NotImplementedError
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.net(x)
+        raise NotImplementedError
 
 
 class MVCLModel(nn.Module):
-    """Multi-View Contrastive Learning: dual encoders + projection heads."""
+    """Multi-View Contrastive Learning: dual encoders + projection heads.
+
+    Architecture:
+        Physical View (27D) ──→ GNN Encoder ──→ Projection Head ──┐
+                                                                   ├─→ InfoNCE Loss
+        Semantic View (17D) ──→ GNN Encoder ──→ Projection Head ──┘
+
+    Features:
+        - Pluggable GNN backbone via BackboneRegistry (GIN/GAT/GCN)
+        - Semantic-aware negative sample reweighting
+        - Averaged dual-view embeddings for downstream tasks
+
+    Args:
+        physical_dim: Input dimension for physical view
+        semantic_dim: Input dimension for semantic view
+        hidden_dim: GNN hidden layer dimension
+        repr_dim: Representation dimension (encoder output)
+        proj_dim: Projection dimension (contrastive space)
+        backbone: GNN backbone type ('gin', 'gat', 'gcn')
+        num_layers: Number of GNN layers
+        dropout: Dropout rate
+        temperature: InfoNCE temperature parameter
+    """
 
     def __init__(
         self,
@@ -41,36 +59,18 @@ class MVCLModel(nn.Module):
         **backbone_kwargs,
     ):
         super().__init__()
-
-        self.physical_dim = physical_dim
-        self.semantic_dim = semantic_dim
-        self.repr_dim = repr_dim
-
-        BackboneClass = BackboneRegistry.get(backbone)
-
-        self.physical_encoder = BackboneClass(
-            physical_dim, hidden_dim, repr_dim, num_layers, dropout, **backbone_kwargs
-        )
-        self.semantic_encoder = BackboneClass(
-            semantic_dim, hidden_dim, repr_dim, num_layers, dropout, **backbone_kwargs
-        )
-
-        self.physical_proj = ProjectionHead(repr_dim, repr_dim, proj_dim)
-        self.semantic_proj = ProjectionHead(repr_dim, repr_dim, proj_dim)
-
-        self.loss_fn = InfoNCELoss(temperature=temperature)
+        # Implementation withheld — will be released upon paper publication.
+        raise NotImplementedError
 
     def forward(
         self, x_phys: torch.Tensor, x_sem: torch.Tensor, edge_index: torch.Tensor
     ) -> tuple:
-        """Forward: encode both views and project."""
-        h_phys = self.physical_encoder(x_phys, edge_index)
-        h_sem = self.semantic_encoder(x_sem, edge_index)
+        """Forward: encode both views and project to contrastive space.
 
-        z_phys = self.physical_proj(h_phys)
-        z_sem = self.semantic_proj(h_sem)
-
-        return h_phys, h_sem, z_phys, z_sem
+        Returns:
+            (h_phys, h_sem, z_phys, z_sem): representations and projections
+        """
+        raise NotImplementedError
 
     def compute_loss(
         self,
@@ -78,12 +78,11 @@ class MVCLModel(nn.Module):
         z_sem: torch.Tensor,
         sem_probs: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        """Compute contrastive loss."""
-        return self.loss_fn(z_phys, z_sem, sem_probs=sem_probs)
+        """Compute contrastive loss with optional semantic-aware weighting."""
+        raise NotImplementedError
 
     def get_embeddings(
         self, x_phys: torch.Tensor, x_sem: torch.Tensor, edge_index: torch.Tensor
     ) -> torch.Tensor:
-        """Get merged embeddings for downstream tasks."""
-        h_phys, h_sem, _, _ = self.forward(x_phys, x_sem, edge_index)
-        return (h_phys + h_sem) / 2.0
+        """Get merged embeddings (averaged dual-view) for downstream tasks."""
+        raise NotImplementedError

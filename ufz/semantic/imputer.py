@@ -2,12 +2,19 @@
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch_geometric.nn import GATConv
 
 
 class CrossViewImputer(nn.Module):
-    """Physics → POI distribution via GAT + MLP."""
+    """Physics → POI distribution via GAT + MLP.
+
+    Architecture:
+        - 2-layer GAT encoder with multi-head attention and BatchNorm
+        - MLP decoder with softmax output
+
+    Input:  Physical features [N, in_dim] + edge_index [2, E]
+    Output: POI distribution  [N, num_classes]
+    """
 
     def __init__(
         self,
@@ -18,40 +25,17 @@ class CrossViewImputer(nn.Module):
         dropout: float = 0.3,
     ):
         super().__init__()
-        self.dropout = dropout
-
-        self.conv1 = GATConv(
-            in_dim, hidden_dim, heads=heads, dropout=dropout, concat=True
-        )
-        self.bn1 = nn.BatchNorm1d(hidden_dim * heads)
-
-        self.conv2 = GATConv(
-            hidden_dim * heads, hidden_dim, heads=1, concat=False, dropout=dropout
-        )
-        self.bn2 = nn.BatchNorm1d(hidden_dim)
-
-        self.decoder = nn.Sequential(
-            nn.Linear(hidden_dim, hidden_dim // 2),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(hidden_dim // 2, num_classes),
-        )
+        # Implementation withheld — will be released upon paper publication.
+        raise NotImplementedError
 
     def encode(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        h = F.dropout(x, p=self.dropout, training=self.training)
-        h = self.conv1(h, edge_index)
-        h = self.bn1(h)
-        h = F.elu(h)
-        h = F.dropout(h, p=self.dropout, training=self.training)
-        h = self.conv2(h, edge_index)
-        h = self.bn2(h)
-        h = F.elu(h)
-        return h
+        """Encode physical features into latent space via GAT layers."""
+        raise NotImplementedError
 
     def decode(self, h: torch.Tensor) -> torch.Tensor:
-        logits = self.decoder(h)
-        return F.softmax(logits, dim=-1)
+        """Decode latent representation into POI category probabilities."""
+        raise NotImplementedError
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        h = self.encode(x, edge_index)
-        return self.decode(h)
+        """Full forward pass: encode → decode."""
+        raise NotImplementedError
