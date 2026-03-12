@@ -94,17 +94,18 @@ class SAGEEncoder(BaseEncoder):
 
 ```
 ufz/
-├── data/           # Spatial data loading (Shapefile, POI, raster) + CRS auto-detection
 ├── features/       # 27D physical features: shape(13) + size(2) + height(3) + orientation(4) + density
 ├── graph/          # Delaunay triangulation with quantile-based edge pruning
 ├── semantic/       # 3-stage enhancement: CrossViewImputer → IDW → RefineNet
 ├── models/         # MVCL model with pluggable GNN backbones (GIN, GAT, GCN)
 ├── analysis/       # Clustering (HDBSCAN/DBSCAN/KMeans/Leiden) + dimensionality reduction
 ├── visualization/  # Interactive Plotly visualizations
-├── export/         # GeoJSON export, model checkpoints, knowledge graph interface
 ├── config/         # YAML-based config with inheritance (_base_) support
+├── utils/          # Logging, caching, random seed utilities
 └── cli.py          # CLI: train / cluster / export / visualize
 ```
+
+> **Note**: Data loaders, training configs, export modules, and full pipeline scripts will be released upon paper publication.
 
 ## Installation
 

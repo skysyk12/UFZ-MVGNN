@@ -33,5 +33,14 @@ Thumbs.db
 orca_src/
 orca
 
+# Not released yet (will be available upon paper publication)
+configs/
+scripts/
+docs/
+demo*.py
+activate_and_run.sh
+ufz/export/
+ufz/data/
+
 # Misc
 *.log
