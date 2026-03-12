@@ -1,0 +1,66 @@
+data:
+  shp_path: null
+  poi_path: null
+  raster_paths: []
+  output_dir: outputs
+  cache_dir: cache
+  target_crs: EPSG:32650
+
+features:
+  groups:
+    - shape
+    - size
+    - orientation
+  use_height: true
+  use_graphlet: false
+  graphlet_orca_path: ./orca
+  max_edge_length_m: 200.0
+
+semantic:
+  idw_radius: 100.0
+  idw_bandwidth: 30.0
+  poi_max_distance: 50.0
+  poi_lon_col: update_wgs84_lon
+  poi_lat_col: update_wgs84_lat
+  poi_type_col: poi类型
+  hidden_dim: 128
+  heads: 4
+  dropout: 0.3
+  num_classes: 17
+  epochs: 200
+  lr: 0.001
+  weight_decay: 0.00001
+  batch_size: 4096
+  eval_every: 10
+  patience: 30
+
+model:
+  backbone: gin
+  hidden_dim: 256
+  repr_dim: 128
+  proj_dim: 128
+  num_layers: 2
+  dropout: 0.5
+  gat_heads: 4
+  geo_dim: 27
+  topo_dim: 15
+  sem_dim: 64
+  tower_dim: 32
+  fusion_dim: 128
+  epochs: 200
+  lr: 0.001
+  weight_decay: 0.00001
+  batch_size: 4096
+  eval_every: 10
+  patience: 30
+
+analysis:
+  clustering_method: hdbscan
+  hdbscan_min_cluster_size: 15
+  dbscan_eps: 0.5
+  kmeans_n_clusters: 10
+  reducer_method: umap
+  n_components: 2
+
+seed: 42
+device: auto
