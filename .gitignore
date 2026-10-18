@@ -36,7 +36,8 @@ orca
 # Not released yet (will be available upon paper publication)
 configs/
 scripts/
-docs/
+docs/*
+!docs/results/
 demo*.py
 activate_and_run.sh
 ufz/export/
